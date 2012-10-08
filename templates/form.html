@@ -1,0 +1,13 @@
+<div class="notice">
+{% if validation %}
+	{{ validation }}
+{% endif %}
+</div>
+<form method="POST" action="{{baseUrl}}{{urlPrefix}}/users/{% if user %}{{user.id}}{% else %}add{%endif%}">
+	<input type="hidden" name="user[id]" value="{{user.id}}"/>
+	Username <input tabindex="1" name="user[username]" value="{{user.username}}"/>
+	Email <input tabindex="1" name="user[email]" value="{{user.email}}"/>
+	Password <input type="password" tabindex="1" name="user[password]" value=""/>
+	Confirm Password <input type="password" tabindex="1" name="confirmpassword" value=""/>
+	<input type='submit' value='save'/>
+</form>

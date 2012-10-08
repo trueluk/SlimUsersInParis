@@ -1,0 +1,8 @@
+AddHandler application/x-httpd-php53 .php
+
+RewriteEngine On
+#RewriteBase /__/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+RewriteRule (.*).pdf$ _pdf.php?pdf=$1 [QSA,L] #if pdf has query string, go through pdf.php
