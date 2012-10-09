@@ -1,0 +1,9 @@
+<ul class="breadcrumb">
+  <li>
+    <a href="{{baseURL}}/things">Things</a> <span class="divider">/</span>
+  </li>
+  {% for item in breadcrumb %}
+  	<li><a href="{{baseURL}}/things/{{item.id}}">{{ item.title }}</a> <span class="divider">/</span></li>
+  {% endfor %}
+
+</ul>

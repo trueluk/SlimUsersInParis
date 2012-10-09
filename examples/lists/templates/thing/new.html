@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ parent() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+	<h1> new thing </h1>
+    {% include "thing/form.html" %}	
+	{{ body }}
+{% endblock %}

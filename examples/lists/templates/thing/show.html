@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block head %}
+    {{ parent() }}
+    <style type="text/css">
+        .important { color: #336699; }
+    </style>
+{% endblock %}
+{% block content %}
+
+	{% include "thing/breadcrumb.html" %}
+	{% if thing.content %}<div class="well"> {{thing.content}}</div>{% endif %}
+	<!-- show words here -->
+	<hr />
+	{% include "thing/list_items.html" with {'things': children} %}
+
+	{% include "thing/form_button.html" with {'parent_id': thing.id, 'thing': null}  %}
+{% endblock %}

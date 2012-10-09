@@ -1,0 +1,18 @@
+	<ul>
+		{% for thing in things %}
+		    <li id="thing-{{thing.id}}"> <a href="{{baseURL}}/things/{{thing.id}}">{{ thing.title }}</a> <a href="javascript:void(0);" onclick="if(confirm('Are you sure you want to delete this item? All of its children will also be deleted.')) { window.location = '{{baseURL}}/things/{{thing.id}}/delete?r={{thing.parent_id}}';}">[x]</a> 
+		    	{% if thing.content %}
+		    		<div class='well'>{{thing.content}}</div>
+		    	{% endif %}
+		    	<ul>
+		    		{% for t in thing.children().find_many() %}
+					    <li id="thing-{{t.id}}"> <a href="{{baseURL}}/things/{{t.id}}">{{ t.title }}</a> <a href="javascript:void(0);" onclick="if(confirm('Are you sure you want to delete this item? All of its children will also be deleted.')) { window.location = '{{baseURL}}/things/{{t.id}}/delete?r={{thing.parent_id}}';}">[x]</a>
+					    	{% if t.content %}
+					    		<div class='well'>{{t.content}}</div>
+					    	{% endif %}
+					    </li>
+		    		{% endfor %}
+		    	</ul>
+		    </li>
+		{% endfor %}
+	</ul>

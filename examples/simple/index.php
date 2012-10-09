@@ -38,7 +38,7 @@ require '../../../SlimUsersInParis/app.php';	//change if running example in diff
 $app->hook('slim.before', function () use ($app) {
     global $baseURL;
     //depending on which app this is in, that coudl chagne?
-    $app->view()->appendData(array('baseUrl' => $baseURL));
+    $app->view()->appendData(array('baseURL' => $baseURL));
     $_user = User::current();
     if($_user){
         $app->view()->appendData(array('current_user' => $_user ));

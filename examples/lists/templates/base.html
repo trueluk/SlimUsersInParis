@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        {% block head %}
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+            <link rel="stylesheet" href="{{ baseURL }}/assets/bootstrap/css/bootstrap.min.css" />
+            <script type="text/javascript" src="{{ baseURL }}/assets/js/jquery-1.7.2.min.js"></script>            
+            <script type="text/javascript" src="{{ baseURL }}/assets/bootstrap/js/bootstrap.min.js"></script>            
+            <title>Things</title>
+            <style>
+                .navbar-static-top .container, .navbar-fixed-top .container, .navbar-fixed-bottom .container {
+                  width: 640px;
+                }
+              .content, .container { 
+                width: 640px;
+              }
+              </style>
+        {% endblock %}
+    </head>
+    <body style='padding-top: 60px;'>
+        <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+              <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </a>
+              <div class="nav-collapse">
+                <ul class="nav">
+                  <li class={% if(active=='') %} "active" {% endif %}><a href="{{ baseURL }}">Home</a></li>
+                </ul>
+
+                <ul class="nav pull-right">
+                    {% if not current_user %}
+                      <li><a href="{{baseURL}}/login">Login</a></li>
+                    {% else %}
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ current_user.username }} <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="{{baseURL}}/users/{{current_user.id}}">Profile</a></li>
+                          <li class="divider"></li>
+                          <li><a href="{{baseURL}}/logout">Logout</a></li>
+                        </ul>
+                      </li>
+                    {% endif %}
+                    </ul>
+              </div><!--/.nav-collapse -->
+
+            </div>
+          </div>
+        </div>  
+          
+        <div id="content" class="container">{% block content %}{% endblock %}</div>
+        <div id="footer">
+            {% block footer %}
+                
+            {% endblock %}
+        </div>
+    </body>
+</html>

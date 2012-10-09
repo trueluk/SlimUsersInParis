@@ -9,7 +9,7 @@
 				if(typeof jQuery === 'undefined'){
 					e.target.parentNode.submit();
 				}else{
-					$.post("{{baseUrl}}{{urlPrefix}}/users/"+id+"/delete/json", function(r){
+					$.post("{{baseURL}}{{urlPrefix}}/users/"+id+"/delete/json", function(r){
 						if(r.deleted){
 							//destroyed
 							$("#user-"+id).remove();
@@ -32,11 +32,11 @@
 		{{ validation }}
 	{% endif %}
 	</div>
-	<a tabindex="1" class="btn" href="{{baseUrl}}{{urlPrefix}}/users/add">Add user</a>	
+	<a tabindex="1" class="btn" href="{{baseURL}}{{urlPrefix}}/users/add">Add user</a>	
 	<ul>
 		{% for user in users %}
-		    <li id="user-{{user.id}}"> <a href="{{baseUrl}}/users/{{user.id}}">{{ user.username|raw }}</a> 
-		    	<form method="POST" style="display:inline;" action="{{baseUrl}}/users/{{user.id}}/delete">
+		    <li id="user-{{user.id}}"> <a href="{{baseURL}}/users/{{user.id}}">{{ user.username|raw }}</a> 
+		    	<form method="POST" style="display:inline;" action="{{baseURL}}/users/{{user.id}}/delete">
 		    		<a href="javascript:void(0);" onclick="destroyUser(event, {{user.id}});">[x]</a>  	
 			    </form>
 		    </li>

@@ -3,7 +3,7 @@
 	{{ validation }}
 {% endif %}
 </div>
-<form method="POST" action="{% if action %}{{action}}{% else %}{{baseUrl}}{{urlPrefix}}/users/{% if user %}{{user.id}}{% else %}add{%endif%}{% endif %}">
+<form method="POST" action="{% if action %}{{action}}{% else %}{{baseURL}}{{urlPrefix}}/users/{% if user %}{{user.id}}{% else %}add{%endif%}{% endif %}">
 	<input type="hidden" name="user[id]" value="{{user.id}}"/>
 	Username <input tabindex="1" name="user[username]" value="{{user.username}}"/>
 	Email <input tabindex="1" name="user[email]" value="{{user.email}}"/>

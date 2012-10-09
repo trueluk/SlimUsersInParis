@@ -1,0 +1,12 @@
+<form method="POST" action="{{baseURL}}/things">
+	<input type="hidden" name="thing[id]" value="{{thing.id}}"/>
+	{% if parent_id %}
+	<input type="hidden" name="thing[parent_id]" value="{{parent_id}}"/>
+	{% endif %}
+
+	<label class="control-label">Title</label> 
+	<input tabindex="1" name="thing[title]" value="{{thing.title}}"/>
+	<label class="control-label">Note</label>
+	<textarea tabindex="2" name="thing[content]">{{thing.content}}</textarea>
+	<br/><button type="submit" class="btn">Submit</button> <button type="reset" class="btn" onclick='$("#formToggle").hide();$("#formToggleBtn").show();'>Cancel</button>
+</form>
