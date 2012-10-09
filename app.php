@@ -12,6 +12,7 @@ $loader = $twig->getLoader()->addPath(dirname(__FILE__) . "/templates", 'users')
 **/
 class User extends Model {
     public static $_table = 'users';    
+    public $_validation_msg = '';
     public static function current(){
         $app = Slim::getInstance();
         $_sCookie = $app->getEncryptedCookie('usid',false);
@@ -68,6 +69,38 @@ class User extends Model {
         $app->setEncryptedCookie('usid',$_user->session_key, null,$baseURL);        
         return $_user;
     }
+    public function validate($request_post){
+
+        $this->email = trim($request_post->user['email']);
+        if(!isset($request_post->user['password'])){
+            $this->_validation_msg = "Please provide a password";
+            return false;
+        }
+        if($request_post->user['password'] != $request_post->confirmpassword){
+            $this->_validation_msg = "Passwords must match";
+            return false;
+        }
+
+        if(!isset( $request_post->user['username']) || trim( $request_post->user['username']) == '' ){
+            $this->_validation_msg = "Please provide a username";
+            return false;
+        }
+
+        //check for valid username
+        if($this->username != trim($request_post->user['username'])){
+            //creating/changing username
+            $this->username = trim($request_post->user['username']);
+            $usernameExists = Model::factory("User")->where("username",$this->username)->find_one();
+            if($usernameExists){
+                $this->_validation_msg = "That username is already in use. Please choose another.";
+                return false;
+            }
+        }
+        
+        $this->salt = User::salt();
+        $this->password = User::password( trim($request_post->user['password']), $this->salt);
+        return true;      
+    }
     //override default Paris/Idiorm as_array()
     public function as_array(){
         $arr = parent::as_array();
@@ -111,8 +144,8 @@ function generate_random_string($name_length = 8) {
         $app = Slim::getInstance();
         $_user = User::current();
         $USER = $_user;
-
     };
+
     /** 
         - requires user has role = admin
     **/
@@ -128,9 +161,11 @@ function generate_random_string($name_length = 8) {
 /** user routes 
     /login
     /logout
+    /signup
+    /users/profile (user edits his own?)
+    /users/add
     /users/:id/delete
     /users/:id
-    /users/add
     /users
 
     **/
@@ -168,8 +203,7 @@ function generate_random_string($name_length = 8) {
                     $validation = 'Invalid login';
                 }
             } 
-            else
-            {
+            else{
                 $validation = 'Invalid login';
             }
         }
@@ -177,6 +211,32 @@ function generate_random_string($name_length = 8) {
         $app->render('@users/login.html', array("validation" => isset($validation) ? $validation : null));
     })->via('GET','POST')->name('login');
 
+
+    $app->map('/signup', function() use ($app) {
+        global $baseURL;
+        // Test for POST
+        if($app->request()->isPost() && sizeof($app->request()->post()) > 1){
+            $post = (object) $app->request()->post();
+            //create user if possible
+            $new_user = Model::factory("User")->create();
+            if( $new_user->validate($post) ){
+                $new_user->save();
+                $validation = "User created";
+                //good
+                User::login( (object) array("user"=>$new_user->username, "password"=>$post->confirmpassword) );
+                $app->redirect($baseURL);
+                return;
+            }else{
+                $validation = $new_user->_validation_msg;
+            }
+        }
+        $app->render('@users/signup.html', array(
+            "action"=>$baseURL."/signup", 
+            "validation" => isset($validation) ? $validation : null,
+            "user" => isset($new_user) ? $new_user : null
+            ));
+    })->via('GET','POST')->name('signup'); 
+    
 
     /** 
         List the current users 
@@ -204,40 +264,53 @@ function generate_random_string($name_length = 8) {
         //used for creating new users
         //handle post
         $request_post = $app->request()->post();  // <- getBody() of http request
-        if($request_post["user"]["password"] != $request_post["confirmpassword"]){
-            //error
-            return $app->render("@users/add.html", array("validation"=>"passwords must match"));
-        }
-        //parse user model, save;
         $new_user = Model::factory("User")->create();
-        $new_user->username = trim($request_post["user"]["username"]);
-        $new_user->email = trim($request_post["user"]["email"]);
-        $new_user->salt = User::salt();
-        $new_user->password = User::password( trim($request_post["user"]["password"]), $new_user->salt);
-        $new_user->save();
+        if( $new_user->validate($request_post) ){
+            $new_user->save();
+            $validation = "User created";
+        }else{
+            $validation = $new_user->validation_msg;
+        }
+        $app->render("@users/add.html", array("validation" => $validation));    
 
-        $app->render("@users/add.html", array("validation" => "User created"));    
     });
 
     /* show edit form for a user */
-    $app->get("/users/:id", $SUiP_requires_login, $SUiP_requires_admin, function($id) use($app){
+    $app->get("/users/:id", $SUiP_requires_login, function($id) use($app){
+        global $USER,$baseURL;
+        if(!$USER->isAdmin() && $USER->id != $id){
+            //no permission
+            return $app->render("@users/error.html", array("message"=>"You do not have permission to view this page."));
+        }
+        //user must be admin to edit, or user must be user->id = $id
         $user = Model::factory("User")->find_one($id);
+        if(!$user){
+            //user doesn't exist
+            return $app->render("@users/error.html", array("message"=>"User does not exist"));
+        }
         $app->render("@users/edit.html", array("user" => $user));
     });
 
-    $app->post("/users/:id", $SUiP_requires_login, $SUiP_requires_admin, function($id) use($app){
+    $app->post("/users/:id", $SUiP_requires_login, function($id) use($app){
+        global $USER,$baseURL;
+        if(!$USER->isAdmin() && $USER->id != $id){
+            //no permission
+            return $app->render("@users/error.html", array("message"=>"You do not have permission to view this page."));
+        }        
         //update user
         $user = Model::factory("User")->find_one($id);
-        $request_post = $app->request()->post();  // <- getBody() of http request
-        if(isset($request_post["user"]["password"]) && $request_post["user"]["password"] != $request_post["confirmpassword"]){
-            //error
-            return $app->render("@users/edit.html", array("user" => $user, "validation"=>"passwords must match"));
+        if(!$user){
+            //user doesn't exist
+            return $app->render("@users/error.html", array("message"=>"User does not exist"));
+        }        
+        $post = (object) $app->request()->post();
+        if( $user->validate($post) ){
+            $validation = "User updated";
+            $user->save();
+        }else{
+            $validation = $user->_validation_msg;
         }
-        $user->email = trim($request_post["user"]["email"]);
-        $user->salt = User::salt();
-        $user->password = User::password( trim($request_post["user"]["password"]), $user->salt);
-        $user->save();
-        return $app->render("@users/edit.html", array("user" => $user, "validation"=>"User updated"));
+        return $app->render("@users/edit.html", array("user" => $user, "validation"=>$validation));
     });
     /* 
         Delete a user

@@ -11,7 +11,7 @@ SlimUsersInParis
 
 ## Purpose:
 
-Slim.php is great for quickly prototying web apps in PHP, however, there is no User model. SlimUsersInParis adds a user class with routes for logging in/out, creating users, editing users and deleting users. A user's session is stored via encrypted cookies. Each password is randomly salted before being encrypted. There is crude support of user roles via the role column; however, ideally roles would be handled in a separate table.
+Slim.php is great for quickly prototying web apps in PHP, however, there is no User model. SlimUsersInParis adds a user class with routes for logging in/out, signing up, creating users, editing users and deleting users. A user's session is stored via encrypted cookies. Each password is randomly salted before being encrypted. There is crude support of user roles via the role column; however, ideally roles would be handled in a separate table.
 
 ## Example Usage:
 

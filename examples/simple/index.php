@@ -35,8 +35,6 @@ $app = new Slim(array(
 
 require '../../../SlimUsersInParis/app.php';	//change if running example in different folder
 
-
-
 $app->hook('slim.before', function () use ($app) {
     global $baseURL;
     //depending on which app this is in, that coudl chagne?
@@ -54,7 +52,7 @@ $app->get("/", $SUiP_current_user, function() use($app){
 		echo "You are logged in as " . $USER->username. ". <a href='".$baseURL."/logout'>Logout</a>";
 		echo "<br/><a href='".$baseURL."/private'>View private page</a>";
 	}else{
-		echo "You are not logged in. <a href='".$baseURL."/login'>Login here</a>";
+		echo "You are not logged in. <a href='".$baseURL."/login'>Login here</a> or <a href='".$baseURL."/signup'>Signup here</a>";
 	}
 });
 $app->get("/private", $SUiP_requires_login, function() use($app){
