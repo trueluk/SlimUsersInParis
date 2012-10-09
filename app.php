@@ -72,13 +72,24 @@ class User extends Model {
     public function validate($request_post){
 
         $this->email = trim($request_post->user['email']);
-        if(!isset($request_post->user['password'])){
+
+        //password only required if user is being created
+        //if no password is provided, and user does not exist, error
+        if( !isset($this->username) && 
+            (!isset($request_post->user['password']) 
+            || trim($request_post->user['password'] == '') )){
             $this->_validation_msg = "Please provide a password";
             return false;
         }
-        if($request_post->user['password'] != $request_post->confirmpassword){
-            $this->_validation_msg = "Passwords must match";
-            return false;
+        if( trim($request_post->user['password']) != '' ){
+            //a password is provided
+            if(trim($request_post->user['password']) != trim($request_post->confirmpassword) ){
+                $this->_validation_msg = "Passwords must match";
+                return false;
+            }
+            //set this password
+            $this->salt = User::salt();
+            $this->password = User::password( trim($request_post->user['password']), $this->salt);                 
         }
 
         if(!isset( $request_post->user['username']) || trim( $request_post->user['username']) == '' ){
@@ -96,9 +107,6 @@ class User extends Model {
                 return false;
             }
         }
-        
-        $this->salt = User::salt();
-        $this->password = User::password( trim($request_post->user['password']), $this->salt);
         return true;      
     }
     //override default Paris/Idiorm as_array()
@@ -263,13 +271,13 @@ function generate_random_string($name_length = 8) {
     $app->post("/users/add", $SUiP_requires_login, $SUiP_requires_admin, function() use($app){
         //used for creating new users
         //handle post
-        $request_post = $app->request()->post();  // <- getBody() of http request
+        $request_post = (object) $app->request()->post();  // <- getBody() of http request
         $new_user = Model::factory("User")->create();
         if( $new_user->validate($request_post) ){
             $new_user->save();
             $validation = "User created";
         }else{
-            $validation = $new_user->validation_msg;
+            $validation = $new_user->_validation_msg;
         }
         $app->render("@users/add.html", array("validation" => $validation));    
 
