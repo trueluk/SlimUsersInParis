@@ -1,6 +1,6 @@
 <?PHP
 $app = Slim::getInstance();
-
+//added a comment
 //Setup Twig.php namespace
 $twig = $app->view()->getEnvironment();
 //namespace is users
